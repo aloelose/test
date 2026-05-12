@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>НЕО-ДИЗАЙН 2026 | Интерактивный опыт</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --accent: #00ffcc;
+            --purple: #8a2be2;
+            --bg: #050505;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Кастомный курсор */
+        #custom-cursor {
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        /* Контейнер для 3D - строго под текстом */
+        #canvas-container {
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            z-index: -2; /* Глубоко внизу */
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
+
+        /* Затемняющий слой для читаемости */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1; /* Между 3D и текстом */
+            pointer-events: none;
+        }
+
+        /* Hero */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 7rem);
+            line-height: 1;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: -2px;
+        }
+
+        .outline-text {
+            -webkit-text-stroke: 1px var(--accent);
+            color: transparent;
+        }
+
+        /* Bento Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(250px, auto);
+            gap: 20px;
+            margin: 100px 0;
+        }
+
+        .bento-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .bento-item:hover {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .bento-wide { grid-column: span 2; }
+        .bento-tall { grid-row: span 2; }
+
+        /* Horizontal Scroll */
+        .horizontal-container {
+            width: 300%;
+            height: 100vh;
+            display: flex;
+            flex-wrap: nowrap;
+        }
+
+        .horizontal-item {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syncopate';
+            padding: 20px;
+            text-align: center;
+        }
+
+        .feature-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 50px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .progress-bar-wrap {
+            position: fixed;
+            top: 0; left: 0; width: 0%; height: 5px;
+            background: linear-gradient(to right, var(--purple), var(--accent));
+            z-index: 10001;
+        }
+
+        @media (max-width: 768px) {
+            .bento-grid { grid-template-columns: 1fr; }
+            .bento-wide, .bento-tall { grid-column: span 1; grid-row: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="custom-cursor"></div>
+    <div class="progress-bar-wrap" id="progress"></div>
+    <div id="canvas-container"></div>
+    <div class="overlay"></div>
+
+    <!-- Навигация -->
+    <nav class="container-fluid p-4 d-flex justify-content-between fixed-top" style="z-index: 1000;">
+        <div class="fw-bold fs-4" style="letter-spacing: 2px;">NEO.LAB</div>
+        <div class="d-none d-md-block">
+            <a href="#" class="text-white text-decoration-none mx-3 small opacity-75">ПРОЕКТЫ</a>
+            <a href="#" class="text-white text-decoration-none mx-3 small opacity-75">ТЕХНОЛОГИИ</a>
+            <a href="#" class="btn btn-outline-info rounded-pill px-4 btn-sm">СВЯЗАТЬСЯ</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero container">
+        <div class="text-center">
+            <div class="feature-tag animate-hero">Эволюция веба 2026</div>
+            <h1 class="hero-title animate-hero">ЦИФРОВАЯ<br><span class="outline-text">ЭСТЕТИКА</span><br>БУДУЩЕГО</h1>
+            <p class="mt-4 opacity-50 animate-hero">Прокрутите вниз, чтобы увидеть магию параллакса</p>
+        </div>
+    </section>
+
+    <!-- Bento Grid -->
+    <section class="container py-5" style="position: relative; z-index: 1;">
+        <h2 class="mb-5 font-syncopate">НАШИ ВОЗМОЖНОСТИ</h2>
+        <div class="bento-grid">
+            <div class="bento-item bento-wide">
+                <div class="feature-tag">01. Графика</div>
+                <h3>WebGL Реактивность</h3>
+                <p class="opacity-75">Мы используем Three.js для создания живых интерфейсов, которые реагируют на каждое движение вашего курсора.</p>
+            </div>
+            <div class="bento-item">
+                <h3>GSAP 3</h3>
+                <p class="opacity-75">Безупречно плавная анимация скролла.</p>
+            </div>
+            <div class="bento-item bento-tall">
+                <div class="feature-tag">02. UX/UI</div>
+                <h3>Интерфейсы нового типа</h3>
+                <p class="opacity-75">Пользовательский опыт — это не только кнопки, это эмоции от взаимодействия с контентом в пространстве.</p>
+                <div class="mt-auto pt-4">
+                    <div class="p-3 border border-secondary rounded-4 text-center">3D СКРОЛЛИНГ</div>
+                </div>
+            </div>
+            <div class="bento-item">
+                <h3>Скорость</h3>
+                <p class="opacity-75">60 FPS даже при сложных вычислениях.</p>
+            </div>
+            <div class="bento-item bento-wide">
+                <h3>Адаптивность</h3>
+                <p class="opacity-75">Ваш сайт будет выглядеть безупречно как на мощном ПК, так и на мобильном устройстве.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Horizontal Scroll -->
+    <div id="horizontal-wrapper" style="overflow: hidden; background: #000;">
+        <div class="horizontal-container">
+            <div class="horizontal-item">
+                <h2 class="display-1 fw-bold">ИММЕРСИВНОСТЬ</h2>
+                <p class="lead">Погружение в контент на 100%</p>
+            </div>
+            <div class="horizontal-item" style="color: var(--accent);">
+                <h2 class="display-1 fw-bold">ИНТЕРАКТИВ</h2>
+                <p class="lead">Сайт, который чувствует вас</p>
+            </div>
+            <div class="horizontal-item">
+                <h2 class="display-1 fw-bold">РЕЗУЛЬТАТ</h2>
+                <p class="lead">Создаем то, что запоминается</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Section -->
+    <section class="vh-100 d-flex align-items-center justify-content-center text-center container">
+        <div>
+            <h2 class="display-3 fw-bold mb-4">ГОТОВЫ К ПРЫЖКУ?</h2>
+            <p class="mb-5 opacity-75">Данная страница создана с использованием современных фронтенд-технологий.</p>
+            <button class="btn btn-lg btn-light rounded-pill px-5 py-3 fw-bold">ОБСУДИТЬ ПРОЕКТ</button>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. Кастомный курсор
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX - 10,
+                y: e.clientY - 10,
+                duration: 0.15
+            });
+        });
+
+        // 2. Three.js: Фоновый 3D узел
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Геометрия: Узел Торуса (красивая закрученная штука)
+        const geometry = new THREE.TorusKnotGeometry(10, 3, 200, 32);
+        const material = new THREE.MeshBasicMaterial({ 
+            color: 0x00ffcc, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4 
+        });
+        const torusKnot = new THREE.Mesh(geometry, material);
+        scene.add(torusKnot);
+
+        camera.position.z = 40;
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            torusKnot.rotation.x += 0.003;
+            torusKnot.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        // 3. Анимация появления Hero-контента
+        gsap.from(".animate-hero", {
+            y: 60,
+            opacity: 0,
+            duration: 1.2,
+            stagger: 0.2,
+            ease: "power4.out"
+        });
+
+        // 4. Горизонтальный скролл
+        let sections = gsap.utils.toArray(".horizontal-item");
+        gsap.to(sections, {
+            xPercent: -100 * (sections.length - 1),
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#horizontal-wrapper",
+                pin: true,
+                scrub: 1,
+                end: () => "+=" + window.innerWidth * 2
+            }
+        });
+
+        // 5. Прогресс-бар сверху
+        gsap.to("#progress", {
+            width: "100%",
+            scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 0.3
+            }
+        });
+
+        // 6. Изменение 3D при скролле (Параллакс объекта)
+        gsap.to(torusKnot.position, {
+            y: 20,
+            z: -10,
+            scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1
+            }
+        });
+
+        // Обновление размера при ресайзе окна
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
